@@ -20,11 +20,10 @@ from pathlib import Path
 from collections import Counter
 import pickle
 
-import wave, struct, librosa #important
-
-%matplotlib inline
+import wave, struct, librosa #importan
 
 SAMPLING_RATE = 44100
+DIR_PATH = "data/" #may change
 
 def load_audio_file(file_path: str):
     """Loads a target audio file path.
@@ -278,7 +277,7 @@ def file_path_to_fingerprints(file_path, amplitude_percentile: float=0.75, fanou
 
     samples = load_audio_file(file_path)
 
-    S = dig_samp_to_spec(samples)
+    S = dig_samp_to_spec_plot(samples)
 
     neighborhood = iterate_structure(generate_binary_structure(2, 1), 20)
 
@@ -301,7 +300,7 @@ def amplitude_plot(file_name):
     plt.title("Amplitude Waveform")
     plt.show()
 
-def process_all_songs(directory_path: str, num_fanout: int = 15): # directory_path="/data"
+def process_all_songs(directory_path=DIR_PATH, num_fanout: int = 15):
     fingerprints = []
     
     for filename in os.listdir(directory_path):
@@ -309,7 +308,7 @@ def process_all_songs(directory_path: str, num_fanout: int = 15): # directory_pa
             file_path = os.path.join(directory_path, filename)
 
             audio = load_audio_file(file_path)
-            S = dig_samp_to_spec(audio)
+            S = dig_samp_to_spec_plot(audio)
 
             # Define neighborhood structure for peak detection
             neighborhood = generate_binary_structure(2, 1)
@@ -353,6 +352,28 @@ def find_cutoff_amp(S: np.ndarray, percentile: float):
 def cos_sim(v1, v2):
     return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
+
+
+
+all_fingerprints = process_all_songs()
+def cutoff_similarity(): #recorded_audio = convert_mic_frames_to_audio
+    # find smallest value of cos_sim across all fingerprints
+    # help lol
+    diffs = []
+    for fp in all_fingerprints:
+        diffs += [cos_sim(fp, fp2) for fp2 in all_fingerprints]
+    return min(diffs)
+
+def compare(recorded_audio):
+    """determine if the audio captured is baby crying or not
+
+    Args:
+        recorded_audio: ndarray or original audio????
+    """
+    pass
+
+
+#testing
 import random
 filepath = str("data/"+random.choice(os.listdir("data/")))
 test = load_audio_file(filepath)

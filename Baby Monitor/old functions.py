@@ -1,4 +1,3 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
@@ -23,6 +22,8 @@ import pickle
 
 import wave, struct, librosa #important
 
+%matplotlib inline
+
 SAMPLING_RATE = 44100
 
 def load_audio_file(file_path: str):
@@ -39,8 +40,11 @@ def load_audio_file(file_path: str):
         Audio samples
     """
     audio, samp_rate = librosa.load(file_path, sr=SAMPLING_RATE, mono=True)
+    # audio = audio.astype(np.int16)     audio data converts to zeros
     return audio
 
+'''
+DOESNT WORK WITH WAV FILES
 def audio_file_to_array(file_path):
     """
     input: file path
@@ -57,11 +61,13 @@ def audio_file_to_array(file_path):
         data = audio_file.read(data_chunk_size)
 
     # Converting the raw binary data to a list of integers : 
+    print(data)
     data_array = np.frombuffer(data, dtype=np.int32)
     # Convert to float32
     data_array = data_array.astype(np.int16)
 
     return data_array #type int16
+'''
 
 def convert_mic_frames_to_audio(frames: np.ndarray) -> np.ndarray:
     """Converts frames taken from microphone to 16-bit integers
@@ -80,19 +86,24 @@ def convert_mic_frames_to_audio(frames: np.ndarray) -> np.ndarray:
 
 # so audios and recorded noise should both be int16
 
-def dig_samp_to_spec(samples: np.ndarray): # samples = audio_file_to_array(filepath)
-    # using matplotlib's built-in spectrogram function
+def dig_samp_to_spec_plot(samples: np.ndarray):
+    # data = np.hstack([np.frombuffer(i, np.int16) for i in frames])
 
-    S, freqs, times = mlab.specgram(
+    # using matplotlib's built-in spectrogram function
+    fig, ax = plt.subplots()
+
+    S, freqs, times, im = ax.specgram(
         samples,
         NFFT=4096,
         Fs=SAMPLING_RATE,
         window=mlab.window_hanning,
-        noverlap=int(4096 / 2),
+        noverlap=4096 // 2,
         mode='magnitude'
     )
-    
-    return S
+    ax.set_ylim(0, 10000)
+    ax.set_xlabel("time (sec)")
+    ax.set_ylabel("frequency (Hz)")
+    return fig, ax
 
 @njit
 def _peaks(data_2d, rows, cols, amp_min):
@@ -290,8 +301,7 @@ def amplitude_plot(file_name):
     plt.title("Amplitude Waveform")
     plt.show()
 
-#def process_all_songs(directory_path: str, num_fanout: int = 15):
-def process_all_songs(directory_path: str): # directory_path="/data"
+def process_all_songs(directory_path: str, num_fanout: int = 15): # directory_path="/data"
     fingerprints = []
     
     for filename in os.listdir(directory_path):
@@ -343,7 +353,8 @@ def find_cutoff_amp(S: np.ndarray, percentile: float):
 def cos_sim(v1, v2):
     return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
-def compare(recorded_audio): #recorded_audio = convert_mic_frames_to_audio
-    # find smallest value of cos_sim across all fingerprints, helplol
-    for fp in process_all_songs("/data"):
-        #
+import random
+filepath = str("data/"+random.choice(os.listdir("data/")))
+test = load_audio_file(filepath)
+print(test[:10])
+dig_samp_to_spec_plot(test)

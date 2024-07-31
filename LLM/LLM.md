@@ -1,11 +1,11 @@
-# ByteGSPT - architecture of Ollama's Llama3 model
+# ByteGPT - architecture of Ollama's Llama3 model
 
 ## What is it?
-> ByteGSPT stands for Byte - Generative Security Pre-trained Transformer
+> ByteGPT stands for Byte - Generative Pre-trained Transformer
 
 ## How does it help the security system?
 > With high capabilities of live monitoring and analysis of the whole system,
-> ByteGSPT provides a connection and interface to the user
+> ByteGPT provides a connection and interface to the user
 > It can also make decisions to initiate certain tasks accordingly without user input,
 > leading to a more advance and robust security system
 
@@ -13,7 +13,7 @@
 
 ### Performance benchmarks
 
-|               |   ByteGSPT 8B  |     Gemma 7B-It   |    Mistral 7B Instruct   |
+|               |   ByteGPT 8B  |     Gemma 7B-It   |    Mistral 7B Instruct   |
 | ------------- | ------------- | ------------- | ------------- |
 |      MMLU     |     68.4      |     53.3      |     58.4      |
 |      GPQA     |     34.2      |     21.4      |     26.3      |

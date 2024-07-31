@@ -1,4 +1,6 @@
 # run pip install -r requirements
+# would need to fulfill Camera and facenet requirements described on CogWorks website here: 
+# https://rsokl.github.io/CogWeb/Video/prereqs.html
 
 # tkinter
 matplotlib

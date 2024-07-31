@@ -260,17 +260,14 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
 
 
 bob = process_all_songs("/Users/bryan/final capstone/Cogworks-Final-Project/Baby Monitor/data")
-print(bob)
 
-'''
-sum = 0
-while(True):
-    listen_time = 7.5
-    frames, sample_rate = record_audio(listen_time)
+outfile = "db.npy"
+np.save(outfile, bob)
 
-    sum += 1
 
-'''
+
+
+
 
     
     

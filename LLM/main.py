@@ -2,7 +2,8 @@ from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
 from datetime import datetime
 from utils.cryptographer import encrypt, decrypt
-# from utils.sys_prompt import KEY, SYS_PROMPT 
+#from utils.sys_prompt import SYS_PROMPT as sys_prompt
+#from utils.sys_prompt import KEY
 from profiles.Profile import Profile
 
 def export_sys_prompt(prompt, PATH=r"LLM\utils\sys.txt"):
@@ -61,22 +62,24 @@ chain = prompt | model
 
 
 def main():
-    context = ""
     print("Started")
     user_name = input("Enter name: ") 
-    custom_instr = True if (input("Do you want to include/update custom instructions about your profile? (Y/n): ")).lower() == "y" else False
+    custom_instr = True if (input("Do you want to include/update specific information about yourself and home? (Y/n): ")).lower() == "y" else False
     if custom_instr:
-        user_instr = input("Enter user instructions: ")
-        response_instr = input("Enter response instructions: ")
+        user_instr = input("Enter user info/instructions: ")
+        response_instr = input("Enter home info/instructions: ")
         profile = initialize_profile(user_name, user_instr, response_instr)
     else:
         profile = initialize_profile(user_name)
     
+    context = profile.try_load_history()
     
     
     while True:
         user_input = input("You: ")
         if user_input.lower() == "exit":
+            context += "\nUser: Exited ...\n\nUser has exited the chat. New session will began."
+            profile.update_history(context)
             break
 
         result = chain.invoke({"time": datetime.today(), 
@@ -85,8 +88,14 @@ def main():
                                "context": context, 
                                "question": user_input})
         print(f"ByteGPT: {result}")
-        context += f"\nUser: {user_input}\nMe: {result}"
-        
-        
+        try:
+            if "EVENT-ALERT" in user_input:
+                context += f"\nSystem: {user_input}\nMe: {result}"
+            else:
+                context += f"\nUser: {user_input}\nMe: {result}"
+        except:
+            continue
+
+
 if __name__ == "__main__":
     main()

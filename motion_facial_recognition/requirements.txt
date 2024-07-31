@@ -1,0 +1,14 @@
+# run pip install -r requirements
+
+# tkinter
+matplotlib
+torch
+torchvision
+facenet-pytorch
+numpy
+# pickle
+networkx
+mygrad
+# noggins
+mynn
+scikit-image

@@ -25,55 +25,21 @@ import wave, struct, librosa #importan
 from scipy.io import wavfile
 import time
 
-
-
+db = np.load("db.npy", allow_pickle=True)
 SAMPLING_RATE = 8000
 
+def process_recordings(frames, num_fanout: int=15) -> np.ndarray:
 
+    samples = convert_mic_frames_to_audio(frames)
+    S = dig_samp_to_spec(samples)
+    neighborhood = generate_binary_structure(2, 1)
+    neighborhood = iterate_structure(neighborhood, 20)
+    amp_min = find_cutoff_amp(S, 0.0)
+    peaks = local_peak_locations(S, neighborhood, amp_min)
 
-def process_all_songs(directory_path, num_fanout: int = 15) -> np.ndarray:
-    fingerprints = []
+    fingerprint = local_peaks_to_fingerprints(peaks, num_fanout)
     
-    
-    for filename in os.listdir(directory_path):
-        if filename.endswith(".wav"):
-            file_path = os.path.join(directory_path, filename)
-
-            audio = load_audio_file(file_path)
-            
-            samples = convert_mic_frames_to_audio(audio)
-            S = dig_samp_to_spec(samples)
-
-            # Define neighborhood structure for peak detection
-            neighborhood = generate_binary_structure(2, 1)
-            neighborhood = iterate_structure(neighborhood, 20)
-
-            # Detect peaks
-            amp_min = find_cutoff_amp(S, 0.0)
-            peaks = local_peak_locations(S, neighborhood, amp_min)
-
-            # Generate fingerprints
-            fingerprint = local_peaks_to_fingerprints(peaks, num_fanout)
-            fingerprints.append(fingerprint)
-    
-    return np.array(fingerprints, dtype=object)
-
-def load_audio_file(file_path: str):
-    """Loads a target audio file path.
-
-    Parameters
-    ----------
-    file_path : str
-        File path of song
-        
-    Returns
-    -------
-    recorded_audio: np.ndarray
-        Audio samples
-    """
-    samplerate, audio = wavfile.read(file_path)
-    # audio = audio.astype(np.int16)     audio data converts to zeros
-    return audio
+    return np.array(fingerprint, dtype=object)
 
 def convert_mic_frames_to_audio(frames: np.ndarray) -> np.ndarray:
     """Converts frames taken from microphone to 16-bit integers
@@ -231,21 +197,16 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
     else:
         return "IndexError"
 
+sum = 0
+while sum < 2:
+    listen_time = 7.5
+    print("begin")
+    frames, sample_rate = record_audio(listen_time)
+    fingerprint = process_recordings(frames)
 
-
-bob = process_all_songs("/Users/bryan/final capstone/Cogworks-Final-Project/Baby Monitor/data")
-
-outfile = "db.npy"
-np.save(outfile, bob)
-
-
-
-
-
-
-    
-    
-
-
-
-
+    if(fingerprint in db):
+        print("BABY IS CRYING")
+    else:
+        print("everything is ok")
+    print("recording done")
+    sum += 1

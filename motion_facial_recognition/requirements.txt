@@ -1,6 +1,6 @@
 # run pip install -r requirements
-# would need to fulfill Camera and facenet requirements described on CogWorks website here: 
-# https://rsokl.github.io/CogWeb/Video/prereqs.html
+# would need to fulfill Camera and facenet requirements described on original We Love Bytes Vision Capstone here: 
+# https://github.com/zoe-kch/CogWorks-Vision-Module-Capstone
 
 # tkinter
 matplotlib

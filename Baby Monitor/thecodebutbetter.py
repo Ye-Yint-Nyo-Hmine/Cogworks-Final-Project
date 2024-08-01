@@ -25,7 +25,8 @@ NUM_FANOUT = 15
 LISTEN_TIME = 7.5 #sec
 CUTOFF_SIM = 0.8 # how similar to be considered baby crying
 
-DATA_DIRECTORY = "data/"
+DATA_DIRECTORY = "data/crying/"
+DATABASE_FILE = "databases/train.npy"
 random.shuffle(os.listdir(DATA_DIRECTORY))
 DATASET = os.listdir(DATA_DIRECTORY)
 N = len(DATASET)
@@ -33,7 +34,7 @@ SPLIT = int(N*0.8)
 TRAIN_DATA = DATASET[:SPLIT]
 TEST_DATA = DATASET[SPLIT:]
 
-def process_all_audio(directory_path) -> np.ndarray:
+def process_all_audio(directory_path):
     db = []
     
     for filename in TRAIN_DATA:
@@ -57,7 +58,7 @@ def process_all_audio(directory_path) -> np.ndarray:
             fingerprints = local_peaks_to_fingerprints(peaks) #list
             db.append(fingerprints) # list in list
     
-    return np.array(fingerprints)
+    return fingerprints
 
 def audio_to_fingerprints(audio): #from load_audio_file
     samples = convert_mic_frames_to_audio(audio)
@@ -239,16 +240,10 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
     else:
         return "IndexError"
 
-def make_db(store_at): #already done
+def make_db(store_at = DATABASE_FILE): #already done
     # store_at: file to save database in
     data = process_all_audio(DATA_DIRECTORY)
-    outfile = store_at
     np.save(store_at, data)
-
-#make_db("")
-
-db = np.load("database/traindb.npy")
-
 
 '''
 def check_similarity(frames):
@@ -274,17 +269,20 @@ def check_similarity(frames):
 
 def check_similarity(frames):
     fingerprints = audio_to_fingerprints(frames)
+    print(fingerprints)
 
     match=0
     for audio in db:
-        for fp in fingerprints:
-            if fp in audio:
-                match+=1
-
-    if match/db.size >= 0.5:
+        if audio in fingerprints:
+            match+=1
+    
+    frac = match/db.size
+    print(f'fraction: {frac}')
+    
+    if frac >= CUTOFF_SIM:
         print("baby crying")
     else:
-        print("not baby crying")
+        print("NOT A BABY D:")
 
 def test_on_actual_baby_crying():
     file = DATA_DIRECTORY+random.choice(TEST_DATA)
@@ -297,9 +295,8 @@ def record(listen_time):
     Audio(audio, rate=samplerate)
     check_similarity(audio)
 
+db = np.load("database/traindb.npy")
+
 #test_on_actual_baby_crying()
 
 #record(LISTEN_TIME)
-
-
-

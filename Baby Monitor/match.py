@@ -4,7 +4,6 @@ import matplotlib.mlab as mlab
 # from microphone import record_audio # add if utilizing microphone and in Microphone directory
 from IPython.display import Audio
 from typing import Tuple
-import librosa
 import statistics as stats
 
 from numba import njit
@@ -16,19 +15,16 @@ from microphone import record_audio
 
 from typing import Tuple, Callable, List, Union
 
-import uuid
 import os
 from pathlib import Path
 from collections import Counter
-import pickle
 
-import wave, struct, librosa #importan
+
 from scipy.io import wavfile
-import time
 
 db = np.load("db.npy", allow_pickle=True)
 SAMPLING_RATE = 8000
-CUTOFF_SIM = 0.5
+CUTOFF_SIM = 0.1
 
 def process_recordings(frames, num_fanout: int=15):
 

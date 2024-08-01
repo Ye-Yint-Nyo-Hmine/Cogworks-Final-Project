@@ -1,28 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
-# from microphone import record_audio # add if utilizing microphone and in Microphone directory
 from IPython.display import Audio
 import librosa
 import statistics as stats
 import json
-
 from numba import njit
 from scipy.ndimage.filters import maximum_filter
 from scipy.ndimage.morphology import generate_binary_structure
 from scipy.spatial.distance import cdist
 from scipy.ndimage.morphology import iterate_structure
 from microphone import record_audio
-
 from typing import Tuple, Callable, List, Union
 import random
-
 import uuid
 import os
 from pathlib import Path
 import pickle
-
-import wave, struct, librosa #importan
+import wave, struct, librosa
 from scipy.io import wavfile
 import time
 

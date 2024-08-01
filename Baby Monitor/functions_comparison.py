@@ -37,7 +37,8 @@ CUTOFF_AMP = 0.77 #percentile
 NUM_FANOUT = 15
 LISTEN_TIME = 7.5 #sec
 CUTOFF_SIM = 0.8 # how similar to be considered baby crying
-DATA_DIRECTORY = "data/crying/"
+
+DATA_DIRECTORY = "data/"
 
 
 # In[81]:

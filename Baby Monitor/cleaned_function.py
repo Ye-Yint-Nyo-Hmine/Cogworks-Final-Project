@@ -49,7 +49,7 @@ def process_all_songs(directory_path, num_fanout: int = 15) -> np.ndarray:
             neighborhood = iterate_structure(neighborhood, 20)
 
             # Detect peaks
-            amp_min = find_cutoff_amp(S, 0.77)
+            amp_min = find_cutoff_amp(S, 0.85)
             peaks = local_peak_locations(S, neighborhood, amp_min)
 
             # Generate fingerprints

@@ -24,7 +24,7 @@ from scipy.io import wavfile
 
 db = np.load("db.npy", allow_pickle=True)
 SAMPLING_RATE = 8000
-CUTOFF_SIM = 0.1
+CUTOFF_SIM = 0.2
 
 def process_recordings(frames, num_fanout: int=15):
 
@@ -32,7 +32,7 @@ def process_recordings(frames, num_fanout: int=15):
     S = dig_samp_to_spec(samples)
     neighborhood = generate_binary_structure(2, 1)
     neighborhood = iterate_structure(neighborhood, 20)
-    amp_min = find_cutoff_amp(S, 0.77)
+    amp_min = find_cutoff_amp(S, 0.85)
     peaks = local_peak_locations(S, neighborhood, amp_min)
 
     fingerprint = local_peaks_to_fingerprints(peaks, num_fanout)
@@ -72,12 +72,12 @@ def dig_samp_to_spec(samples: np.ndarray):
     noverlap=4096 // 2,
     mode='magnitude'
     )
-    '''
+    
     ax.set_ylim(0, 4000)
     ax.set_xlabel("time (sec)")
     ax.set_ylabel("frequency (Hz)")
     plt.show()
-    '''
+
     return S
 
 def find_cutoff_amp(S: np.ndarray, percentile: float):
@@ -202,6 +202,7 @@ while sum < 2:
     frames, sample_rate = record_audio(listen_time)
     fingerprint = process_recordings(frames)
 
+    print("searching")
     similarities=[]
     for audio in db:
         match=0

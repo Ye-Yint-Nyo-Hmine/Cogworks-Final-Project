@@ -35,7 +35,6 @@ In order to use this application, install all dependencies through the following
 pip install -r requirements.txt
 ```
 ## Usage
-![image](https://github.com/user-attachments/assets/bb426803-21c3-4c86-9bff-caa507b889e5)
 ![image](https://github.com/user-attachments/assets/a84fa108-2250-4137-b8fb-af5cd6b43c00)
 
 ## Configuration

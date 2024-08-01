@@ -1,14 +1,15 @@
 # import the playht SDK
 from pyht import Client, TTSOptions, Format
-import pygame
 import os
 import speech_recognition as sr
+import pyttsx3
 import time
-import sys
+
+from playsound import playsound
 
 """
 
-install PyAudio, SpeechRecognition, pyht, pygame
+install PyAudio, SpeechRecognition, pyht, pygame pyttsx3
 
 """
 
@@ -33,12 +34,12 @@ def recognize_speech_from_mic(duration=15):
 
     if audio is None:
         print("Recording timed out.")
-        return
+        return "False audio"
 
     try:
         print("Recognizing...")
         text = recognizer.recognize_google(audio)
-        print("You said: " + text)
+        return text
     except sr.UnknownValueError:
         print("Sorry, I did not understand the audio.")
     except sr.RequestError:
@@ -47,62 +48,30 @@ def recognize_speech_from_mic(duration=15):
 
 
 
-def speak(text):
-    client = Client("q5HsDH2f9xajDfuzoBUcuJIBYfK2", "c413dd41ac524130ac6e783d7c9b115c")
 
-    options = TTSOptions(
-        voice="s3://voice-cloning-zero-shot/4bcdf603-fc5f-4040-a6dd-f8d0446bca9d/arthurtrainingsaad/manifest.json",
-        sample_rate=44_100,
-        format=Format.FORMAT_MP3,
-        speed=1.1,
-    )
-    audio_file = "output.mp3"
+def speak(text, speed=None):
+    """
     
-    # Open a file to write the audio stream to
-    with open(audio_file, "wb") as f:
-        for chunk in client.tts(text=text, voice_engine="PlayHT2.0-turbo", options=options):
-            f.write(chunk)
-        f.close()
+    Note: this sounds a lot lamer than the pyht but the api might work tomorrow.
+    """
     
-    # Check if the file has been created and is not empty
-    if not os.path.exists(audio_file) or os.path.getsize(audio_file) == 0:
-        print("Error: Audio file not created or is empty.")
-        return
+    engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    if speed is not None:
+        engine.setProperty("rate", speed)
+    else:
+        engine.setProperty("rate", 150)
+    engine.setProperty('voice', voices[0].id)
+    engine.say(text)
+    engine.runAndWait()
+
     
-    try:
-        # Initialize pygame mixer
-        pygame.mixer.init()
+        
 
-        # Load the mp3 file
-        pygame.mixer.music.load(audio_file)
-
-        # Play the audio file
-        pygame.mixer.music.play()
-
-        # Wait for the audio to finish playing
-        while pygame.mixer.music.get_busy():
-            pygame.time.Clock().tick(10)
-
-    except pygame.error as e:
-        print(f"Error during playback: {e}")
-
-    finally:
-        # Ensure that pygame mixer is stopped and quit
-        if pygame.mixer.get_init():  # Check if pygame mixer is initialized
-            print("stopping")
-            pygame.mixer.music.stop()
-            pygame.mixer.quit()
-            print("stopped")
-
-        # Delete the audio file
-        if os.path.exists(audio_file):
-            print("deleted")
-            os.remove(audio_file)
-            print("finsihed deleted")
-        pygame.quit()
-        print("system stopping")
-        sys.exit()
 
 if __name__ == "__main__":
+
     #text = recognize_speech_from_mic()
-    speak("Hello, world! The quick brown fox jumped over the lazy dog")
+    speak("Hello world! The quick brown fox jumped over the lazy dog")
+    
+    speak("I'm good, My name is Byte GPT")

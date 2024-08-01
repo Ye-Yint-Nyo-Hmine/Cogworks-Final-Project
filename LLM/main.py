@@ -1,10 +1,10 @@
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
 from datetime import datetime
-from utils.cryptographer import encrypt, decrypt
+from LLM.utils.cryptographer import encrypt, decrypt
 #from utils.sys_prompt import SYS_PROMPT as sys_prompt
 #from utils.sys_prompt import KEY
-from profiles.Profile import Profile
+from LLM.profiles.Profile import Profile
 from multiprocessing import Process
 
 def export_sys_prompt(prompt, PATH=r"LLM\utils\sys.txt"):

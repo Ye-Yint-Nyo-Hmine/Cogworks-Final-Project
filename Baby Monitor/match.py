@@ -5,6 +5,7 @@ import matplotlib.mlab as mlab
 from IPython.display import Audio
 from typing import Tuple
 import librosa
+import statistics as stats
 
 from numba import njit
 from scipy.ndimage.filters import maximum_filter
@@ -27,19 +28,20 @@ import time
 
 db = np.load("db.npy", allow_pickle=True)
 SAMPLING_RATE = 8000
+CUTOFF_SIM = 0.5
 
-def process_recordings(frames, num_fanout: int=15) -> np.ndarray:
+def process_recordings(frames, num_fanout: int=15):
 
     samples = convert_mic_frames_to_audio(frames)
     S = dig_samp_to_spec(samples)
     neighborhood = generate_binary_structure(2, 1)
     neighborhood = iterate_structure(neighborhood, 20)
-    amp_min = find_cutoff_amp(S, 0.0)
+    amp_min = find_cutoff_amp(S, 0.77)
     peaks = local_peak_locations(S, neighborhood, amp_min)
 
     fingerprint = local_peaks_to_fingerprints(peaks, num_fanout)
     
-    return np.array(fingerprint, dtype=object)
+    return fingerprint
 
 def convert_mic_frames_to_audio(frames: np.ndarray) -> np.ndarray:
     """Converts frames taken from microphone to 16-bit integers
@@ -204,9 +206,19 @@ while sum < 2:
     frames, sample_rate = record_audio(listen_time)
     fingerprint = process_recordings(frames)
 
-    if(fingerprint in db):
-        print("BABY IS CRYING")
+    similarities=[]
+    for audio in db:
+        match=0
+        for fp in audio:
+            if fp in fingerprint:
+                match+=1
+        similarities.append(match/len(fingerprint)) # % of fingerprints in recorded audio are in crying audio
+
+    avg_sim = stats.mean(similarities) # should be 0-1
+    
+    if avg_sim >= CUTOFF_SIM or 1 in similarities: # adjust if needed
+        print("baby crying")
     else:
-        print("everything is ok")
-    print("recording done")
+        print("NOT A BABY CRYING D:")
+    
     sum += 1

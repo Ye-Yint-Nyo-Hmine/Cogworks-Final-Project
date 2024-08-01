@@ -1,45 +1,47 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
-# from microphone import record_audio # add if utilizing microphone and in Microphone directory
 from IPython.display import Audio
-from typing import Tuple
 import librosa
-
+import statistics as stats
 from numba import njit
 from scipy.ndimage.filters import maximum_filter
 from scipy.ndimage.morphology import generate_binary_structure
 from scipy.spatial.distance import cdist
 from scipy.ndimage.morphology import iterate_structure
 from microphone import record_audio
-
 from typing import Tuple, Callable, List, Union
-
 import uuid
 import os
 from pathlib import Path
-from collections import Counter
 import pickle
-
-import wave, struct, librosa #importan
+import wave, struct, librosa
 from scipy.io import wavfile
 import time
 
+# hyperparams
+CUTOFF_AMP = 0.77 #percentile
+NUM_FANOUT = 15
+LISTEN_TIME = 7.5 #sec
+CUTOFF_SIM = 0.8 # how similar to be considered baby crying
 
+DATA_DIRECTORY = "data/crying/"
+DATABASE_FILE = "databases/train.npy"
+random.shuffle(os.listdir(DATA_DIRECTORY))
+DATASET = os.listdir(DATA_DIRECTORY)
+N = len(DATASET)
+SPLIT = int(N*0.8)
+TRAIN_DATA = DATASET[:SPLIT]
+TEST_DATA = DATASET[SPLIT:]
 
-SAMPLING_RATE = 8000
-
-
-
-def process_all_songs(directory_path, num_fanout: int = 15) -> np.ndarray:
-    fingerprints = []
+def process_all_audio(directory_path):
+    db = []
     
-    
-    for filename in os.listdir(directory_path):
+    for filename in TRAIN_DATA:
         if filename.endswith(".wav"):
             file_path = os.path.join(directory_path, filename)
 
-            audio = load_audio_file(file_path)
+            samplerate, audio = load_audio_file(file_path)
             
             samples = convert_mic_frames_to_audio(audio)
             S = dig_samp_to_spec(samples)
@@ -49,14 +51,30 @@ def process_all_songs(directory_path, num_fanout: int = 15) -> np.ndarray:
             neighborhood = iterate_structure(neighborhood, 20)
 
             # Detect peaks
-            amp_min = find_cutoff_amp(S, 0.85)
+            amp_min = find_cutoff_amp(S, CUTOFF_AMP)
             peaks = local_peak_locations(S, neighborhood, amp_min)
 
             # Generate fingerprints
-            fingerprint = local_peaks_to_fingerprints(peaks, num_fanout)
-            fingerprints.append(fingerprint)
+            fingerprints = local_peaks_to_fingerprints(peaks) #list
+            db.append(fingerprints) # list in list
     
-    return np.array(fingerprints, dtype=object)
+    return fingerprints
+
+def audio_to_fingerprints(audio): #from load_audio_file
+    samples = convert_mic_frames_to_audio(audio)
+    S = dig_samp_to_spec(samples)
+
+    # Define neighborhood structure for peak detection
+    neighborhood = generate_binary_structure(2, 1)
+    neighborhood = iterate_structure(neighborhood, 20)
+
+    # Detect peaks
+    amp_min = find_cutoff_amp(S, 0.77)
+    peaks = local_peak_locations(S, neighborhood, amp_min)
+
+    # Generate fingerprints
+    fingerprints = local_peaks_to_fingerprints(peaks, NUM_FANOUT) #list
+    return fingerprints
 
 def load_audio_file(file_path: str):
     """Loads a target audio file path.
@@ -73,7 +91,7 @@ def load_audio_file(file_path: str):
     """
     samplerate, audio = wavfile.read(file_path)
     # audio = audio.astype(np.int16)     audio data converts to zeros
-    return audio
+    return samplerate, audio
 
 def convert_mic_frames_to_audio(frames: np.ndarray) -> np.ndarray:
     """Converts frames taken from microphone to 16-bit integers
@@ -91,12 +109,8 @@ def convert_mic_frames_to_audio(frames: np.ndarray) -> np.ndarray:
 
     return np.hstack([np.frombuffer(i, np.int16) for i in frames])
 
-
 def dig_samp_to_spec(samples: np.ndarray):
     """Takes a 1-D sampled audio array and returns a 2-D spectrogram."""
-    
-    
-    
     
     fig, ax = plt.subplots()
 
@@ -108,12 +122,7 @@ def dig_samp_to_spec(samples: np.ndarray):
     noverlap=4096 // 2,
     mode='magnitude'
     )
-    '''
-    ax.set_ylim(0, 4000)
-    ax.set_xlabel("time (sec)")
-    ax.set_ylabel("frequency (Hz)")
-    plt.show()
-    '''
+    
     return S
 
 def find_cutoff_amp(S: np.ndarray, percentile: float):
@@ -140,7 +149,7 @@ def find_cutoff_amp(S: np.ndarray, percentile: float):
     return cutoff_amplitude
 
 @njit
-def _peaks(data_2d, rows, cols, amp_min): #changed
+def _peaks(data_2d, rows, cols, amp_min):
     peaks = []
 
     for c, r in np.ndindex(*data_2d.shape[::-1]):
@@ -199,7 +208,7 @@ def local_peak_locations(data_2d, neighborhood, amp_min):
     
     return _peaks(data_2d, rows, cols, amp_min=amp_min)
 
-def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: int):
+def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: int = NUM_FANOUT):
     """Returns the fingerprint a set of peaks packaged as a tuple.
 
     Parameters
@@ -231,21 +240,63 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
     else:
         return "IndexError"
 
+def make_db(store_at = DATABASE_FILE): #already done
+    # store_at: file to save database in
+    data = process_all_audio(DATA_DIRECTORY)
+    np.save(store_at, data)
 
+'''
+def check_similarity(frames):
+    fingerprints = audio_to_fingerprints(frames)
 
-bob = process_all_songs("/Users/bryan/final capstone/Cogworks-Final-Project/Baby Monitor/data")
+    similarities=[]
+    for audio in db:
+        match=0
+        for fp in fingerprints:
+            if fp in audio:
+                match+=1
+        similarities.append(match/len(fingerprints)) # % of fingerprints in recorded audio are in crying audio
 
-outfile = "db.npy"
-np.save(outfile, bob)
-
-
-
-
-
-
+    avg_sim = stats.mean(similarities) # should be 0-1
+    print(similarities)
+    print(avg_sim)
     
+    if avg_sim >= CUTOFF_SIM or max(similarities)>=0.9: # adjust if needed
+        print("baby crying")
+    else:
+        print("NOT A BABY CRYING D:")
+'''
+
+def check_similarity(frames):
+    fingerprints = audio_to_fingerprints(frames)
+    print(fingerprints)
+
+    match=0
+    for audio in db:
+        if audio in fingerprints:
+            match+=1
     
+    frac = match/db.size
+    print(f'fraction: {frac}')
+    
+    if frac >= CUTOFF_SIM:
+        print("baby crying")
+    else:
+        print("NOT A BABY D:")
 
+def test_on_actual_baby_crying():
+    file = DATA_DIRECTORY+random.choice(TEST_DATA)
+    samplerate, frames = load_audio_file(file)
+    check_similarity(frames)
 
+def record(listen_time):
+    frames, samplerate = record_audio(listen_time)
+    audio = convert_mic_frames_to_audio(frames)
+    Audio(audio, rate=samplerate)
+    check_similarity(audio)
 
+db = np.load("database/traindb.npy")
 
+#test_on_actual_baby_crying()
+
+#record(LISTEN_TIME)

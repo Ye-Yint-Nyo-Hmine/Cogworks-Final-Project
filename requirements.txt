@@ -1,0 +1,18 @@
+# run pip install -r requirements
+# would need to fulfill Camera and facenet requirements described on original We Love Bytes Vision Capstone here: 
+# https://github.com/zoe-kch/CogWorks-Vision-Module-Capstone
+
+cogworks-data
+cryptography
+facenet-models
+facenet-pytorch
+gensim
+ipython
+matplotlib
+torch
+torchvision
+numpy
+networkx
+mygrad
+mynn
+scikit-image

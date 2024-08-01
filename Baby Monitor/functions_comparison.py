@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[80]:
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
@@ -31,6 +25,7 @@ import pickle
 import wave, struct, librosa #importan
 from scipy.io import wavfile
 import time
+import random
 
 # hyperparams
 CUTOFF_AMP = 0.77 #percentile
@@ -40,8 +35,6 @@ CUTOFF_SIM = 0.8 # how similar to be considered baby crying
 
 DATA_DIRECTORY = "data/"
 
-
-# In[81]:
 
 
 def process_all_audio(directory_path, num_fanout: int = 15) -> np.ndarray:
@@ -118,11 +111,6 @@ def convert_mic_frames_to_audio(frames: np.ndarray) -> np.ndarray:
     """
 
     return np.hstack([np.frombuffer(i, np.int16) for i in frames])
-
-def record(listen_time):
-    frames, samplerate = record_audio(listen_time)
-    audio = convert_mic_frames_to_audio(frames)
-    return audio, samplerate
 
 def dig_samp_to_spec(samples: np.ndarray):
     """Takes a 1-D sampled audio array and returns a 2-D spectrogram."""
@@ -255,22 +243,13 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
     else:
         return "IndexError"
 
-
-# In[ ]:
-
-
 def make_db(): #already done
     bob = process_all_audio("data/crying/")
     outfile = "db.npy"
     np.save(outfile, bob)
 
-
-# In[87]:
-
-
 def check_similarity(frames):
     fingerprints = audio_to_fingerprints(frames)
-
     similarities=[]
     for audio in db:
         match=0
@@ -281,16 +260,17 @@ def check_similarity(frames):
 
     avg_sim = stats.mean(similarities) # should be 0-1
     
-    if avg_sim >= CUTOFF_SIM or 1 in similarities: # adjust if needed
+    if avg_sim >= CUTOFF_SIM or max(similarities)>=0.9: # adjust if needed
         print("baby crying")
     else:
         print("NOT A BABY CRYING D:")
 
+def record(listen_time):
+    frames, samplerate = record_audio(listen_time)
+    audio = convert_mic_frames_to_audio(frames)
+    Audio(audio, rate=samplerate)
+    check_similarity(audio)
 
-# In[88]:
-
-
-import random
 def test_on_actual_baby_crying():
     samplerate, frames = load_audio_file(DATA_DIRECTORY+random.choice(os.listdir(DATA_DIRECTORY)))
     check_similarity(frames)

@@ -260,11 +260,14 @@ def check_similarity(frames):
         if tuple(audio) in fingerprints:
             match+=1
     
-    frac = match/len(fingerprints)
-    print(match)
-    print(f'fraction: {frac}')
-    
     if match >= 5:
+        '''
+        found mean of 20 random testing matches -> ~8.6
+        stdev -> ~4.48
+        cutoff -> mean - stdev > 4 -> rounded to 5
+        
+        gotta do what u gotta do i guess
+        '''
         print("baby crying")
     else:
         print("NOT A BABY D:")

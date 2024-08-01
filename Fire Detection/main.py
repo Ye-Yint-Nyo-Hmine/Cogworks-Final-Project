@@ -14,6 +14,8 @@ import torchvision
 import torch.nn as nn
 import torch.optim as optim
 from torchvision.models import resnet18, ResNet18_Weights
+from torchvision.io import read_image
+
 
 from gensim.models import KeyedVectors
 from operator import itemgetter
@@ -50,14 +52,23 @@ class ResNetModel(nn.Module):
         self.transforms = weights.transforms(antialias=True)
 
     def __call__(self, x):
-        with torch.no_grad():
-            for i in x:
-                i = self.transforms(i)
-                y_pred = self.resnet18(i)
-                return y_pred.argmax(dim=1)
+        for i in x:
+            y_pred = self.resnet18(torch.unsqueeze(i, 0))
+        
+        return y_pred.argmax(dim=1)
 
         
+def process_xdata(x_data, transforms):
 
+    res = []
+
+    for x in x_data:
+        x = transforms(read_image(x))
+        
+        res += [x]
+
+    return res
+    
 
 def train_model(x_data, true_labels):
     device = torch.device("cpu")
@@ -75,6 +86,14 @@ def train_model(x_data, true_labels):
 
     optimize = optim.SGD(model.resnet18.fc.parameters(), lr = 0.01, momentum = 0.9)
 
+    x_data = process_xdata(x_data, model.transforms)
+
+    print(len(x_data), x_data[0].shape)
+
+    true_labels = np.array([torch.tensor(i) for i in true_labels])
+    print(type(true_labels), true_labels)
+
+
     batch_size = 2 # idk
     acc = 0
     for epoch_cnt in range(30): # revise epoch count
@@ -84,16 +103,16 @@ def train_model(x_data, true_labels):
         for batch_cnt in range(0, len(x_data) // batch_size):
             batch_indices = idxs[(batch_cnt * batch_size):((batch_cnt + 1) * batch_size)]
 
-
-
             print("idxs", len(idxs), idxs.dtype)
             print("loop", batch_cnt, batch_size, len(x_data) // batch_size)
             print("batch indices", len(batch_indices), batch_indices.dtype, batch_indices)
 
-            batch = x_data[batch_indices]
+            batch = torch.stack([x_data[i] for i in batch_indices])
             
-            print(type(batch[0]))
+            print(batch.shape)
             outputs = model(batch) # does this work
+
+            print("here;", outputs.shape, outputs)
 
             loss = criterion(outputs, true_labels)
 

@@ -65,20 +65,22 @@ def do_training():
                      "archive/fire_dataset/non_fire_images/non_fire.2.png", 
                      "archive/fire_dataset/non_fire_images/non_fire.3.png", 
                      "archive/fire_dataset/non_fire_images/non_fire.4.png", 
-                     "archive/fire_dataset/non_fire_images/non_fire.5.png"]'''
+                     "archive/fire_dataset/non_fire_images/non_fire.5.png"]
     
     fire_tensors = []
 
     no_fire_tensors = []
 
-    scripted_transforms = torch.jit.script(data_transforms)
+    #scripted_transforms = torch.jit.script(data_transforms)
 
     for i in range(training_data_size):
         print(read_image(fire_paths[i]).dtype)
-        fire_tensors += scripted_transforms(read_image(fire_paths[i]).to(torch.float32))
-        no_fire_tensors += scripted_transforms(read_image(no_fire_paths[i]).to(torch.float32))
+        fire_tensors += read_image(fire_paths[i]).to(torch.float32)
+        no_fire_tensors += read_image(no_fire_paths[i]).to(torch.float32)
     
-    all_training_data = torch.cat(fire_tensors + no_fire_tensors)
+    all_training_data = torch.cat(fire_tensors + no_fire_tensors)'''
+
+    all_training_data = fire_paths + no_fire_paths
 
     accuracy = main.train_model(all_training_data, [1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
 

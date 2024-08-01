@@ -7,43 +7,48 @@ from LLM.TTS import recognize_speech_from_mic, speak
 from LLM.main import run_chatbot, load_sys_prompt, initialize_profile
 from LLM.utils.cryptographer import decrypt
 from LLM.profiles.Profile import Profile
-# from object_detection.detection import detect_camera as object_detection
-# from face_recognition.main import recognize as face_recognition
-# from fire_detection.main import detect_fire
-# from baby_crying_detection.main import detect_baby_cry
+from object_detection.main import detect_camera
 
+
+
+"""
+Instruction on implementation:
+
+Inside your main program loop, import report_event function from report.py
+Then, call the function when a report should be delivered:
+eg:
+
+while true:
+    if detect_something == True:
+        report_event("Describe the detection in anyway")
+        detect_something = False
+    
+That's it!
+
+Now make it run at the start of the interface by adding it inside one of the start_something() functions below using threading,
+eg:
+
+def start_something():
+    Thread(target=foo).start()
+
+
+start_something() 
+
+"""
 def start_object_detection():
-    Thread(target=object_detection).start()
+    Thread(target=detect_camera).start() # example on how the thread should be like
     
 
 def start_face_recognition():
-    # Start face recognition in a new thread
-    # Thread(target=face_recognition).start()
     pass
-
+    
 def start_fire_detection():
-    # Start fire detection in a new thread
-    # Thread(target=detect_fire).start()
     pass
 
 def start_baby_cry_detection():
-    # Start baby crying detection in a new thread
-    # Thread(target=detect_baby_cry).start()
     pass
 
-def send_message():
-    
-    """if user_message.strip() == "":
-        return
 
-    chat_history.insert(tk.END, "You: " + user_message + "\n")
-    user_input.delete(0, tk.END)
-    
-    # Here you should call your LLM chatbot function and pass the user_message
-    # response = run_llm_chatbot(user_message)
-    response = "This is a placeholder response from the LLM."
-    
-    chat_history.insert(tk.END, "LLM: " + response + "\n")"""
     
 def update_report():
     prev = ""
@@ -79,21 +84,7 @@ speech_button.place(x=600, y=10)
 
 report_thread = Thread(target=update_report).start()
 
-## update history
 
 
-"""object_detection_button = tk.Button(button_frame, text="Start Object Detection", command=start_object_detection)
-object_detection_button.pack(side=tk.LEFT, padx=5)
-
-face_recognition_button = tk.Button(button_frame, text="Start Face Recognition", command=start_face_recognition)
-face_recognition_button.pack(side=tk.LEFT, padx=5)
-
-fire_detection_button = tk.Button(button_frame, text="Start Fire Detection", command=start_fire_detection)
-fire_detection_button.pack(side=tk.LEFT, padx=5)
-
-baby_cry_detection_button = tk.Button(button_frame, text="Start Baby Cry Detection", command=start_baby_cry_detection)
-baby_cry_detection_button.pack(side=tk.LEFT, padx=5)"""
-
-# Start Tkinter main loop
 root.mainloop()
 

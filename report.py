@@ -3,6 +3,10 @@ from twilio.rest import Client
 
 def report_event(event):
     """
+    Args:
+    event (str): The description of the event that triggered the alert.
+    
+    
     It will send a sms alert notification to the user's phone
     
     """

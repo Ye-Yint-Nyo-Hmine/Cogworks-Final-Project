@@ -34,8 +34,8 @@ LISTEN_TIME = 7.5 #sec
 CUTOFF_SIM = 0.8 # how similar to be considered baby crying
 SAMPLING_RATE = 8000
 
-DATA_DIRECTORY = "data/crying/"
-DATABASE_FILE = "databases/train.json"
+DATA_DIRECTORY = "data/"
+DATABASE_FILE = "database/train.json"
 random.shuffle(os.listdir(DATA_DIRECTORY))
 DATASET = os.listdir(DATA_DIRECTORY)
 N = len(DATASET)

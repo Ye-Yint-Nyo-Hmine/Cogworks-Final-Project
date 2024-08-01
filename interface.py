@@ -13,9 +13,8 @@ from LLM.profiles.Profile import Profile
 # from baby_crying_detection.main import detect_baby_cry
 
 def start_object_detection():
-    # Start object detection in a new thread
-    # Thread(target=object_detection).start()
-    pass
+    Thread(target=object_detection).start()
+    
 
 def start_face_recognition():
     # Start face recognition in a new thread
@@ -46,7 +45,16 @@ def send_message():
     
     chat_history.insert(tk.END, "LLM: " + response + "\n")"""
     
-
+def update_report():
+    prev = ""
+    while True:
+        with open("current_reports.txt") as f:
+            read = f.read()
+            f.close()
+            if read != prev:
+                speech_button.add_to_context(read)
+                prev = read
+        
 
 color_palette = {
     "bg": "black",
@@ -68,6 +76,8 @@ root.config(bg=color_palette["bg"])
 
 speech_button = SpeechButton(root, size=300, command=recognize_speech_from_mic, username="User") # Change with name
 speech_button.place(x=600, y=10)
+
+report_thread = Thread(target=update_report).start()
 
 ## update history
 

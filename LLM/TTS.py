@@ -12,21 +12,24 @@ install PyAudio, SpeechRecognition, pyht, pygame
 
 """
 
-def get_audio():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("Listening ...")
-        audio = r.listen(source)
-        said = ""
-        print("Processing ...")
+def recognize_speech_from_mic():
+    recognizer = sr.Recognizer()
+    mic = sr.Microphone()
+
+    with mic as source:
+        print("Adjusting for ambient noise... Please wait.")
+        recognizer.adjust_for_ambient_noise(source)
+        print("Listening...")
+        audio = recognizer.listen(source)
+        
         try:
-            said = r.recognize_google(audio)
-            print(said)
-        except Exception as e:
-            print("Exception: " + str(e))
-
-    return said
-
+            print("Recognizing...")
+            text = recognizer.recognize_google(audio)
+            print("You said: " + text)
+        except sr.UnknownValueError:
+            print("Sorry, I did not understand the audio.")
+        except sr.RequestError:
+            print("Sorry, there was an issue with the speech recognition service.")
 
 
 
@@ -68,6 +71,5 @@ def speak(text):
     os.remove(audio_file)
 
 if __name__ == "__main__":
-    text = get_audio()
-    print(text)
+    text = recognize_speech_from_mic()
     speak("Hello, world! The quick brown fox jumped over the lazy dog")

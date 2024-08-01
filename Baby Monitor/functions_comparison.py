@@ -260,7 +260,7 @@ def check_similarity(frames):
 
     avg_sim = stats.mean(similarities) # should be 0-1
     
-    if avg_sim >= CUTOFF_SIM or 1 in similarities: # adjust if needed
+    if avg_sim >= CUTOFF_SIM or max(similarities)>=0.9: # adjust if needed
         print("baby crying")
     else:
         print("NOT A BABY CRYING D:")

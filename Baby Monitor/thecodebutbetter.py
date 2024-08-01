@@ -1,32 +1,21 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[153]:
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
-# from microphone import record_audio # add if utilizing microphone and in Microphone directory
 from IPython.display import Audio
 import librosa
 import statistics as stats
-
 from numba import njit
 from scipy.ndimage.filters import maximum_filter
 from scipy.ndimage.morphology import generate_binary_structure
 from scipy.spatial.distance import cdist
 from scipy.ndimage.morphology import iterate_structure
 from microphone import record_audio
-
 from typing import Tuple, Callable, List, Union
-
 import uuid
 import os
 from pathlib import Path
 import pickle
-
-import wave, struct, librosa #importan
+import wave, struct, librosa
 from scipy.io import wavfile
 import time
 
@@ -36,17 +25,13 @@ NUM_FANOUT = 15
 LISTEN_TIME = 7.5 #sec
 CUTOFF_SIM = 0.8 # how similar to be considered baby crying
 
-DATA_DIRECTORY = "data/crying/"
-random.shuffle(os.listdir(directory_path))
-DATASET = os.listdir(directory_path)
+DATA_DIRECTORY = "data/"
+random.shuffle(os.listdir(DATA_DIRECTORY))
+DATASET = os.listdir(DATA_DIRECTORY)
 N = len(DATASET)
 SPLIT = int(N*0.8)
 TRAIN_DATA = DATASET[:SPLIT]
 TEST_DATA = DATASET[SPLIT:]
-
-
-# In[154]:
-
 
 def process_all_audio(directory_path) -> np.ndarray:
     db = []
@@ -254,32 +239,19 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
     else:
         return "IndexError"
 
-
-# In[155]:
-
-
 def make_db(store_at): #already done
-    data = process_all_audio("data/crying/")
+    # store_at: file to save database in
+    data = process_all_audio(DATA_DIRECTORY)
     outfile = store_at
     np.save(store_at, data)
 
+#make_db("")
 
-# In[156]:
-
-
-make_db("databases/traindb.npy")
+db = np.load("database/traindb.npy")
 
 
-# In[161]:
-
-
-db = np.load("databases/traindb.npy")
-
-
-# In[180]:
-
-
-def check_similarity_1(frames):
+'''
+def check_similarity(frames):
     fingerprints = audio_to_fingerprints(frames)
 
     similarities=[]
@@ -298,16 +270,12 @@ def check_similarity_1(frames):
         print("baby crying")
     else:
         print("NOT A BABY CRYING D:")
+'''
 
-def check_similarity_2(frames):
+def check_similarity(frames):
     fingerprints = audio_to_fingerprints(frames)
 
     match=0
-    '''
-    for fp in fingerprints:
-        if fp in db:
-            match+=1
-    '''
     for audio in db:
         for fp in fingerprints:
             if fp in audio:
@@ -318,19 +286,10 @@ def check_similarity_2(frames):
     else:
         print("not baby crying")
 
-
-# In[182]:
-
-
-import random
 def test_on_actual_baby_crying():
     file = DATA_DIRECTORY+random.choice(TEST_DATA)
     samplerate, frames = load_audio_file(file)
-    check_similarity_2(frames)
-
-
-# In[101]:
-
+    check_similarity(frames)
 
 def record(listen_time):
     frames, samplerate = record_audio(listen_time)
@@ -338,21 +297,9 @@ def record(listen_time):
     Audio(audio, rate=samplerate)
     check_similarity(audio)
 
+#test_on_actual_baby_crying()
 
-# In[183]:
-
-
-test_on_actual_baby_crying()
-
-
-# In[117]:
-
-
-record(LISTEN_TIME)
-
-
-# In[ ]:
-
+#record(LISTEN_TIME)
 
 
 

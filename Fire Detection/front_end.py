@@ -82,7 +82,8 @@ def do_training():
 
     all_training_data = fire_paths + no_fire_paths
 
-    accuracy = main.train_model(all_training_data, [1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+    accuracy = main.train_model(all_training_data, [[1, 0], [1, 0], [1, 0], [1, 0], [1, 0], 
+                                                    [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]])
 
     print(accuracy)
 

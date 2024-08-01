@@ -52,11 +52,17 @@ class ResNetModel(nn.Module):
         self.transforms = weights.transforms(antialias=True)
 
     def __call__(self, x):
+        print(x.shape)
+        y_preds = []
         for i in x:
+            print(i.shape)
+            print(torch.unsqueeze(i, 0).shape)
             y_pred = self.resnet18(torch.unsqueeze(i, 0))
-        
-        return y_pred.argmax(dim=1)
+            y_preds += y_pred
 
+        y_preds = torch.stack([torch.tensor(j) for j in y_preds])
+        
+        return y_preds
         
 def process_xdata(x_data, transforms):
 
@@ -90,7 +96,7 @@ def train_model(x_data, true_labels):
 
     print(len(x_data), x_data[0].shape)
 
-    true_labels = np.array([torch.tensor(i) for i in true_labels])
+    true_labels = torch.stack([torch.tensor(i) for i in true_labels])
     print(type(true_labels), true_labels)
 
 
@@ -108,15 +114,18 @@ def train_model(x_data, true_labels):
             print("batch indices", len(batch_indices), batch_indices.dtype, batch_indices)
 
             batch = torch.stack([x_data[i] for i in batch_indices])
+            y_true = true_labels[batch_indices]
             
-            print(batch.shape)
+            print("batch shape", batch.shape)
             outputs = model(batch) # does this work
 
-            print("here;", outputs.shape, outputs)
+            print("output shape:", outputs.shape, outputs)
+            print("true labels shape:", true_labels.shape)
+            print("y_true", y_true.shape, y_true)
 
-            loss = criterion(outputs, true_labels)
+            loss = criterion(outputs, y_true.to(torch.float32))
 
-            loss.backward()
+            #loss.backward()
             optimize.step()
             print(loss.item())
             

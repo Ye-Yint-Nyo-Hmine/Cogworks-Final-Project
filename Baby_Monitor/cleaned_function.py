@@ -4,10 +4,7 @@ import matplotlib.mlab as mlab
 # from microphone import record_audio # add if utilizing microphone and in Microphone directory
 from IPython.display import Audio
 from typing import Tuple
-import statistics as stats
-from camera import test_camera
-
-
+import librosa
 
 from numba import njit
 from scipy.ndimage.filters import maximum_filter
@@ -18,27 +15,65 @@ from microphone import record_audio
 
 from typing import Tuple, Callable, List, Union
 
+import uuid
 import os
 from pathlib import Path
-import acoustid
+from collections import Counter
+import pickle
+
+import wave, struct, librosa #importan
+from scipy.io import wavfile
+import time
 
 
-db = np.load("db.npy", allow_pickle=True)
+
 SAMPLING_RATE = 8000
-CUTOFF_SIM = 0.001
 
-def process_recordings(frames, num_fanout: int=15):
 
-    samples = convert_mic_frames_to_audio(frames)
-    S = dig_samp_to_spec(samples)
-    neighborhood = generate_binary_structure(2, 1)
-    neighborhood = iterate_structure(neighborhood, 20)
-    amp_min = find_cutoff_amp(S, 0.85)
-    peaks = local_peak_locations(S, neighborhood, amp_min)
 
-    fingerprint = local_peaks_to_fingerprints(peaks, num_fanout)
+def process_all_songs(directory_path, num_fanout: int = 15) -> np.ndarray:
+    fingerprints = []
     
-    return fingerprint
+    
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".wav"):
+            file_path = os.path.join(directory_path, filename)
+
+            audio = load_audio_file(file_path)
+            
+            samples = convert_mic_frames_to_audio(audio)
+            S = dig_samp_to_spec(samples)
+
+            # Define neighborhood structure for peak detection
+            neighborhood = generate_binary_structure(2, 1)
+            neighborhood = iterate_structure(neighborhood, 20)
+
+            # Detect peaks
+            amp_min = find_cutoff_amp(S, 0.85)
+            peaks = local_peak_locations(S, neighborhood, amp_min)
+
+            # Generate fingerprints
+            fingerprint = local_peaks_to_fingerprints(peaks, num_fanout)
+            fingerprints.append(fingerprint)
+    
+    return np.array(fingerprints, dtype=object)
+
+def load_audio_file(file_path: str):
+    """Loads a target audio file path.
+
+    Parameters
+    ----------
+    file_path : str
+        File path of song
+        
+    Returns
+    -------
+    recorded_audio: np.ndarray
+        Audio samples
+    """
+    samplerate, audio = wavfile.read(file_path)
+    # audio = audio.astype(np.int16)     audio data converts to zeros
+    return audio
 
 def convert_mic_frames_to_audio(frames: np.ndarray) -> np.ndarray:
     """Converts frames taken from microphone to 16-bit integers
@@ -64,6 +99,7 @@ def dig_samp_to_spec(samples: np.ndarray):
     
     
     fig, ax = plt.subplots()
+    plt.close()
 
     S, freqs, times, im = ax.specgram(
     samples,
@@ -73,12 +109,12 @@ def dig_samp_to_spec(samples: np.ndarray):
     noverlap=4096 // 2,
     mode='magnitude'
     )
-    
+    '''
     ax.set_ylim(0, 4000)
     ax.set_xlabel("time (sec)")
     ax.set_ylabel("frequency (Hz)")
     plt.show()
-
+    '''
     return S
 
 def find_cutoff_amp(S: np.ndarray, percentile: float):
@@ -198,32 +234,20 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
 
 
 
-sum = 0
-while sum < 2:
-    listen_time = 7.5
-    print("begin")
-    frames, sample_rate = record_audio(listen_time)
+bob = process_all_songs("/Users/bryan/final capstone/Cogworks-Final-Project/Baby Monitor/data")
+print("bob")
+outfile = "/Users/bryan/final capstone/Cogworks-Final-Project/db.npy"
+np.save(outfile, bob)
 
-    fingerprints = process_recordings(frames)
-    
-    match = 0
-    for audio in db:
-        for tup in audio:
-            if tup in fingerprints:
-                match += 1
 
-    frac = match/len(fingerprints)
-    print(match)
-    print(f'fraction: {frac}')
-    sum += 1
-    
-    if match >= 5:
-        print("baby crying")
-        fig, ax, img = test_camera(port=0, exposure=0.2)
-    else:
-        print("NOT A BABY D:")
+
+
 
 
 
     
+    
+
+
+
 

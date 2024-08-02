@@ -8,6 +8,7 @@ from LLM.main import run_chatbot, load_sys_prompt, initialize_profile
 from LLM.utils.cryptographer import decrypt
 from LLM.profiles.Profile import Profile
 from object_detection.main import detect_camera
+from Baby_Monitor.match import compare
 
 
 
@@ -46,7 +47,7 @@ def start_fire_detection():
     pass
 
 def start_baby_cry_detection():
-    pass
+    Thread(target=compare).start()
 
 
     
@@ -83,6 +84,7 @@ speech_button = SpeechButton(root, size=300, command=recognize_speech_from_mic, 
 speech_button.place(x=600, y=10)
 
 report_thread = Thread(target=update_report).start()
+start_baby_cry_detection()
 
 
 

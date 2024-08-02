@@ -5,6 +5,9 @@ import matplotlib.mlab as mlab
 from IPython.display import Audio
 from typing import Tuple
 import statistics as stats
+from camera import test_camera
+
+
 
 from numba import njit
 from scipy.ndimage.filters import maximum_filter
@@ -17,14 +20,12 @@ from typing import Tuple, Callable, List, Union
 
 import os
 from pathlib import Path
-from collections import Counter
+import acoustid
 
-
-from scipy.io import wavfile
 
 db = np.load("db.npy", allow_pickle=True)
 SAMPLING_RATE = 8000
-CUTOFF_SIM = 0.2
+CUTOFF_SIM = 0.001
 
 def process_recordings(frames, num_fanout: int=15):
 
@@ -195,27 +196,34 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
     else:
         return "IndexError"
 
+
+
 sum = 0
 while sum < 2:
     listen_time = 7.5
     print("begin")
     frames, sample_rate = record_audio(listen_time)
-    fingerprint = process_recordings(frames)
 
-    print("searching")
-    similarities=[]
+    fingerprints = process_recordings(frames)
+    
+    match = 0
     for audio in db:
-        match=0
-        for fp in audio:
-            if fp in fingerprint:
-                match+=1
-        similarities.append(match/len(fingerprint)) # % of fingerprints in recorded audio are in crying audio
+        for tup in audio:
+            if tup in fingerprints:
+                match += 1
 
-    avg_sim = stats.mean(similarities) # should be 0-1
-    
-    if avg_sim >= CUTOFF_SIM or 1 in similarities: # adjust if needed
-        print("baby crying")
-    else:
-        print("NOT A BABY CRYING D:")
-    
+    frac = match/len(fingerprints)
+    print(match)
+    print(f'fraction: {frac}')
     sum += 1
+    
+    if match >= 5:
+        print("baby crying")
+        fig, ax, img = test_camera(port=0, exposure=0.2)
+    else:
+        print("NOT A BABY D:")
+
+
+
+    
+

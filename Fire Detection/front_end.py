@@ -10,6 +10,9 @@ from PIL import Image
 import random
 from torchvision.io import read_image
 import main
+from tkinter import *
+from PIL import Image,ImageTk
+
 
 '''
 Don't want to upload the whole data set, but it's being pulled from here
@@ -82,10 +85,27 @@ def do_training():
 
     all_training_data = fire_paths + no_fire_paths
 
-    accuracy = main.train_model(all_training_data, [[1, 0], [1, 0], [1, 0], [1, 0], [1, 0], 
-                                                    [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]])
+    training_labels = [[int(path in fire_paths), int(path in no_fire_paths)] for path in all_training_data]
 
-    print(accuracy)
+    model_accuracy, acc_list = main.train_model(all_training_data, training_labels)
+
+    print(model_accuracy)
+
+    acc_list_by_end = acc_list[len(acc_list) - len(all_training_data) :]
+
+    for path_idx in range(len(all_training_data)):
+        path = all_training_data[path_idx]
+        cur_acc = acc_list_by_end[path_idx]
+        print(path, len(acc_list))
+        root = Tk()
+        root.resizable(width=True, height=True) # prevents resizing window
+        canvas = Canvas(root, width=600, height=600)
+        canvas.configure(bd=0, highlightthickness=0)
+        canvas.pack()
+        canvas.create_image(100, 100, image = ImageTk.PhotoImage(Image.open(path)))
+        canvas.create_text(100, 100, text = f"The accuracy for this image was {cur_acc}")
+        root.mainloop()
+        print("bye!")
 
 
 do_training()

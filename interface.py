@@ -8,7 +8,12 @@ from LLM.main import run_chatbot, load_sys_prompt, initialize_profile
 from LLM.utils.cryptographer import decrypt
 from LLM.profiles.Profile import Profile
 from object_detection.main import detect_camera
+
 from Baby_Monitor.match import compare
+
+
+from motion_facial_recognition import main
+
 
 
 
@@ -41,7 +46,7 @@ def start_object_detection():
     
 
 def start_face_recognition():
-    pass
+    Thread(target=main).start()
     
 def start_fire_detection():
     pass

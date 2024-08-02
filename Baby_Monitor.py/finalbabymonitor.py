@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
@@ -36,18 +30,16 @@ LISTEN_TIME = 7.5 #sec
 CUTOFF_SIM = 0.8 # how similar to be considered baby crying
 SAMPLING_RATE = 8000
 
-DATA_DIRECTORY = "data/crying/"
-DATABASE_FILE = "databases/train.json"
+DATA_DIRECTORY = "data/"
+DATABASE_FILE = "database/train.json"
+DATABASE_FILE_2 = "database/train2.txt" #run comment below
+#make_db_2(DATABASE_FILE_2)
 random.shuffle(os.listdir(DATA_DIRECTORY))
 DATASET = os.listdir(DATA_DIRECTORY)
 N = len(DATASET)
 SPLIT = int(N*0.8)
 TRAIN_DATA = DATASET[:SPLIT]
 TEST_DATA = DATASET[SPLIT:]
-
-
-# In[10]:
-
 
 def process_all_audio(directory_path):
     db = []
@@ -324,10 +316,6 @@ def record(listen_time):
     audio = convert_mic_frames_to_audio(frames)
     check_sim(audio)
 
-
-# In[21]:
-
-
 def process_all_audio_vectors(directory_path):
     db = []
     
@@ -351,58 +339,13 @@ def make_db_vectors(outfile = DATABASE_FILE_2): #already done
     with open(DATABASE_FILE_2, "wb") as fp:   #Pickling
         pickle.dump(data, fp)
 
-
-# In[4]:
-
-
-DATABASE_FILE_2 = "databases/train2.txt"
-'''
-make_db_2(DATABASE_FILE_2)
-'''
-
-
-# In[5]:
-
-
 with open(DATABASE_FILE_2, 'rb') as fp:
     db_vectors = pickle.load(fp)
 
 with open(DATABASE_FILE, 'r') as f:
     db_fingerprints = json.load(f)
 
+#test_on_actual_baby_crying()
 
-# In[21]:
-
-
-test_on_actual_baby_crying()
-
-
-# In[20]:
-
-
-record(LISTEN_TIME)
-
-
-# In[8]:
-
-
-acc=0
-for dat in TEST_DATA:
-    file = DATA_DIRECTORY+dat
-    samplerate, frames = load_audio_file(file)
-    if check_sim(frames):
-        acc+=1
-accuracy = acc/len(TEST_DATA)
-
-
-# In[9]:
-
-
-accuracy
-
-
-# In[29]:
-
-
-record(LISTEN_TIME)
+#record(LISTEN_TIME)\
 

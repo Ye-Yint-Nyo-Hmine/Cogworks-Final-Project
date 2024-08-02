@@ -29,8 +29,9 @@ LISTEN_TIME = 7.5 #sec
 CUTOFF_SIM = 0.8 # how similar to be considered baby crying
 SAMPLING_RATE = 8000
 
-DATA_DIRECTORY = "data/crying/"
-DATABASE_FILE = "databases/train.json"
+DATA_DIRECTORY = "data/"
+DATABASE_FILE = "database/train.json" #fingerprints
+DATABASE_FILE_2 = "database/train2.txt" #vectors
 random.shuffle(os.listdir(DATA_DIRECTORY))
 DATASET = os.listdir(DATA_DIRECTORY)
 N = len(DATASET)
@@ -332,7 +333,6 @@ def make_db_vectors(outfile = DATABASE_FILE_2): #already done
         pickle.dump(data, fp)
 
 #MAKE VECTORS DATABASE - couldnt upload large txt file
-DATABASE_FILE_2 = "database/train2.txt"
 make_db_2(DATABASE_FILE_2)
 
 with open(DATABASE_FILE_2, 'rb') as fp:
@@ -340,9 +340,6 @@ with open(DATABASE_FILE_2, 'rb') as fp:
 
 with open(DATABASE_FILE, 'r') as f:
     db_fingerprints = json.load(f)
-
-len(db),len(TRAIN_DATA) #list for each song
-
 
 #test_on_actual_baby_crying()
 

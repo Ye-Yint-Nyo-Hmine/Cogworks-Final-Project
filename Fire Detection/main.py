@@ -15,6 +15,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision.models import resnet18, ResNet18_Weights
 from torchvision.io import read_image
+from PIL import Image
 
 
 from gensim.models import KeyedVectors
@@ -52,11 +53,11 @@ class ResNetModel(nn.Module):
         self.transforms = weights.transforms(antialias=True)
 
     def __call__(self, x):
-        print(x.shape)
+        #print(x.shape)
         y_preds = []
         for i in x:
-            print(i.shape)
-            print(torch.unsqueeze(i, 0).shape)
+            #print(i.shape)
+            #print(torch.unsqueeze(i, 0).shape)
             y_pred = self.resnet18(torch.unsqueeze(i, 0))
             y_preds += y_pred
 
@@ -94,11 +95,12 @@ def train_model(x_data, true_labels):
 
     x_data = process_xdata(x_data, model.transforms)
 
-    print(len(x_data), x_data[0].shape)
+    #print(len(x_data), x_data[0].shape)
 
     true_labels = torch.stack([torch.tensor(i) for i in true_labels])
-    print(type(true_labels), true_labels)
+    #print(type(true_labels), true_labels)
 
+    acc_list = []
 
     batch_size = 2 # idk
     acc = 0
@@ -109,28 +111,31 @@ def train_model(x_data, true_labels):
         for batch_cnt in range(0, len(x_data) // batch_size):
             batch_indices = idxs[(batch_cnt * batch_size):((batch_cnt + 1) * batch_size)]
 
-            print("idxs", len(idxs), idxs.dtype)
+            '''print("idxs", len(idxs), idxs.dtype)
             print("loop", batch_cnt, batch_size, len(x_data) // batch_size)
-            print("batch indices", len(batch_indices), batch_indices.dtype, batch_indices)
+            print("batch indices", len(batch_indices), batch_indices.dtype, batch_indices)'''
 
             batch = torch.stack([x_data[i] for i in batch_indices])
             y_true = true_labels[batch_indices]
             
-            print("batch shape", batch.shape)
+            #print("batch shape", batch.shape)
             outputs = model(batch) # does this work
 
-            print("output shape:", outputs.shape, outputs)
+            '''print("output shape:", outputs.shape, outputs)
             print("true labels shape:", true_labels.shape)
-            print("y_true", y_true.shape, y_true)
+            print("y_true", y_true.shape, y_true)'''
 
             loss = criterion(outputs, y_true.to(torch.float32))
 
             #loss.backward()
             optimize.step()
-            print(loss.item())
             
-            acc += accuracy(outputs, true_labels)
+            temp_acc = accuracy(outputs, y_true.to(torch.float32))
 
-    return acc / batch_cnt
+            acc += temp_acc
+
+            acc_list += [temp_acc]
+
+    return (acc / (batch_cnt*epoch_cnt) * 100, acc_list)
 
 

@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -43,8 +38,6 @@ SPLIT = int(N*0.8)
 TRAIN_DATA = DATASET[:SPLIT]
 TEST_DATA = DATASET[SPLIT:]
 
-
-# In[70]:
 
 
 def process_all_audio(directory_path):
@@ -315,9 +308,6 @@ def record(listen_time):
     check_sim(audio)
 
 
-# In[ ]:
-
-
 def process_all_audio_vectors(directory_path):
     db = []
     
@@ -341,16 +331,9 @@ def make_db_vectors(outfile = DATABASE_FILE_2): #already done
     with open(DATABASE_FILE_2, "wb") as fp:   #Pickling
         pickle.dump(data, fp)
 
-
-# In[8]:
-
-
-DATABASE_FILE_2 = "databases/train2.txt"
+#MAKE VECTORS DATABASE - couldnt upload large txt file
+DATABASE_FILE_2 = "database/train2.txt"
 make_db_2(DATABASE_FILE_2)
-
-
-# In[67]:
-
 
 with open(DATABASE_FILE_2, 'rb') as fp:
     db_vectors = pickle.load(fp)
@@ -361,14 +344,7 @@ with open(DATABASE_FILE, 'r') as f:
 len(db),len(TRAIN_DATA) #list for each song
 
 
-# In[73]:
+#test_on_actual_baby_crying()
 
-
-test_on_actual_baby_crying()
-
-
-# In[74]:
-
-
-record(LISTEN_TIME)
+#record(LISTEN_TIME)
 

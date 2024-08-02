@@ -22,7 +22,7 @@ Our model makes use of pretrained models as well as curated datasets for our var
 <br/>
 ## Features
 These are some important features that our program can accomplish:
-- [x] A fully developed user interface with a pretrained Llama3 model with the ability to answer questions
+- [x] A fully developed user interface with a pretrained Llama 3 model with the ability to answer questions
 - [x] Speech to text and text to speech in the user interface
 - [x] Object detection in video files and through live camera
 - [x] Facial recognition and motion detection through live camera

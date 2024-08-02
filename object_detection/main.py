@@ -10,6 +10,10 @@ import random
 from model import *
 import pickle
 
+import sys
+sys.path.append('report.py')
+from report import report_event
+
 ### FasterRCNN_MobileNet_V3_Large_320_FPN model, weights, classes, and transforms ###
 model, weights, classes, transforms = get_model_weights_classes_transforms()
 
@@ -76,6 +80,9 @@ def detect_camera(min_score: float=0.6):
                 output = model(input)[0] # get first output because we only passed one frame/image in
 
             boxes, labels, scores = filter_boxes_labels_scores(output["boxes"], output["labels"], output["scores"], min_score=min_score)
+            if boxes.any():
+                report_event("Object detected in live camera!")
+
             boxes_drawn = draw_boxes_on_frame(frame, boxes, labels, scores, classes)
 
             cv2.imshow("Camera Detection", boxes_drawn)

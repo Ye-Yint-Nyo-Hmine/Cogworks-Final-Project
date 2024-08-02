@@ -4,6 +4,7 @@ import matplotlib.mlab as mlab
 from IPython.display import Audio
 import librosa
 import statistics as stats
+import json
 from numba import njit
 from scipy.ndimage.filters import maximum_filter
 from scipy.ndimage.morphology import generate_binary_structure
@@ -11,6 +12,7 @@ from scipy.spatial.distance import cdist
 from scipy.ndimage.morphology import iterate_structure
 from microphone import record_audio
 from typing import Tuple, Callable, List, Union
+import random
 import uuid
 import os
 from pathlib import Path
@@ -24,9 +26,10 @@ CUTOFF_AMP = 0.77 #percentile
 NUM_FANOUT = 15
 LISTEN_TIME = 7.5 #sec
 CUTOFF_SIM = 0.8 # how similar to be considered baby crying
+SAMPLING_RATE = 8000
 
-DATA_DIRECTORY = "data/crying/"
-DATABASE_FILE = "databases/train.npy"
+DATA_DIRECTORY = "data/"
+DATABASE_FILE = "database/train.json"
 random.shuffle(os.listdir(DATA_DIRECTORY))
 DATASET = os.listdir(DATA_DIRECTORY)
 N = len(DATASET)
@@ -55,10 +58,10 @@ def process_all_audio(directory_path):
             peaks = local_peak_locations(S, neighborhood, amp_min)
 
             # Generate fingerprints
-            fingerprints = local_peaks_to_fingerprints(peaks) #list
-            db.append(fingerprints) # list in list
+            fingerprints = local_peaks_to_fingerprints(peaks)
+            db += fingerprints
     
-    return fingerprints
+    return db
 
 def audio_to_fingerprints(audio): #from load_audio_file
     samples = convert_mic_frames_to_audio(audio)
@@ -240,54 +243,41 @@ def local_peaks_to_fingerprints(local_peaks: List[Tuple[int, int]], num_fanout: 
     else:
         return "IndexError"
 
-def make_db(store_at = DATABASE_FILE): #already done
-    # store_at: file to save database in
+def make_db(outfile = DATABASE_FILE): #already done
+    # outfile: file to save database in
     data = process_all_audio(DATA_DIRECTORY)
-    np.save(store_at, data)
 
-'''
+    with open(outfile, 'w') as f:
+        # indent=2 is not needed but makes the file human-readable if the data is nested
+        json.dump(data, f, indent=2) 
+
 def check_similarity(frames):
     fingerprints = audio_to_fingerprints(frames)
-
-    similarities=[]
-    for audio in db:
-        match=0
-        for fp in fingerprints:
-            if fp in audio:
-                match+=1
-        similarities.append(match/len(fingerprints)) # % of fingerprints in recorded audio are in crying audio
-
-    avg_sim = stats.mean(similarities) # should be 0-1
-    print(similarities)
-    print(avg_sim)
     
-    if avg_sim >= CUTOFF_SIM or max(similarities)>=0.9: # adjust if needed
-        print("baby crying")
-    else:
-        print("NOT A BABY CRYING D:")
-'''
-
-def check_similarity(frames):
-    fingerprints = audio_to_fingerprints(frames)
-    print(fingerprints)
-
     match=0
+    
     for audio in db:
-        if audio in fingerprints:
+        if tuple(audio) in fingerprints:
             match+=1
     
-    frac = match/db.size
-    print(f'fraction: {frac}')
-    
-    if frac >= CUTOFF_SIM:
+    if match >= 5:
+        '''
+        found mean of 20 random testing matches -> ~8.6
+        stdev -> ~4.48
+        cutoff -> mean - stdev > 4 -> rounded to 5
+        
+        gotta do what u gotta do i guess
+        '''
         print("baby crying")
     else:
         print("NOT A BABY D:")
 
+    return match
+
 def test_on_actual_baby_crying():
     file = DATA_DIRECTORY+random.choice(TEST_DATA)
     samplerate, frames = load_audio_file(file)
-    check_similarity(frames)
+    return check_similarity(frames)
 
 def record(listen_time):
     frames, samplerate = record_audio(listen_time)
@@ -295,7 +285,9 @@ def record(listen_time):
     Audio(audio, rate=samplerate)
     check_similarity(audio)
 
-db = np.load("database/traindb.npy")
+with open(DATABASE_FILE, 'r') as f:
+    db = json.load(f)
+db = [tuple(fp) for fp in db]
 
 #test_on_actual_baby_crying()
 

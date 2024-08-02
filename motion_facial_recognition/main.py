@@ -24,6 +24,10 @@ from typing import Union, List
 import tkinter as tk
 from tkinter import messagebox
 
+import sys
+sys.path.append('report.py')
+from report import report_event
+
 # this will download the pretrained weights for MTCNN and resnet
 # (if they haven't already been fetched)
 # which should take just a few seconds
@@ -36,9 +40,9 @@ database = {}
 with open('database.pkl', 'rb') as f:
     database = pickle.load(f)
 
-threshold = None
-with open('threshold.txt', 'r') as f:
-    threshold = float(f.readline().strip())
+threshold = 0.36
+# with open('threshold.txt', 'r') as f:
+#    threshold = float(f.readline().strip())
 
 
 
@@ -221,12 +225,17 @@ def main():
             if result > 0.3:
                 detection_color = (0, 25, 255)
                 feed = cv2.putText(feed, "Motion Detected!!", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.9, detection_color, 2)
+                report_event("Motion detected in live camera!")
 
             boxes = detect_faces(frame)
             if boxes:
+                report_event("Face detected in live camera!")
                 descriptors = get_descriptors(frame, boxes) # shape (N, 512) array
                 names = [match(descriptor[np.newaxis, :], threshold) for descriptor in descriptors]
                 
+                if "Unknown" in names:
+                    report_event("Unknown person detected in live camera!")
+
                 feed = draw_boxes(feed, boxes, names, camera=True, object_detected="Human") # image shape = (360, 640, 3)
                     
 

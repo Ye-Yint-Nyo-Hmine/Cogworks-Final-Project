@@ -34,6 +34,10 @@ In order to use this application, install all dependencies through the following
 ```
 pip install -r requirements.txt
 ```
+Then run interface.py
+```
+python interface.py
+```
 ## Usage
 ![image](https://github.com/user-attachments/assets/a84fa108-2250-4137-b8fb-af5cd6b43c00)
 

@@ -16,3 +16,6 @@ networkx
 mygrad
 mynn
 scikit-image
+pyttsx3
+langchain_ollama
+playsound

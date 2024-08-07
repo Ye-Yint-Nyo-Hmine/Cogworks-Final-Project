@@ -11,7 +11,7 @@
 4. [Configuration](#configuration)
 5. [Contributors](#contributors)
 
-7. ## Introduction
+## Introduction
 For our Final Capstone Project for BWSI, we created a collection of security features that are accessible through a LLM user interface. 
 Our model makes use of pretrained models as well as curated datasets for our varied features. 
 <br/>

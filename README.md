@@ -7,10 +7,9 @@
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Features](#features)
-3. [Installation](#installation)
-4. [Usage](#usage)
-5. [Configuration](#configuration)
-6. [Contributors](#contributors)
+3. [Usage](#usage)
+4. [Configuration](#configuration)
+5. [Contributors](#contributors)
 
 7. ## Introduction
 For our Final Capstone Project for BWSI, we created a collection of security features that are accessible through a LLM user interface. 
@@ -29,15 +28,6 @@ These are some important features that our program can accomplish:
 - [x] Crying baby detection through audio
 - [x] Fire detection through image
 
-## Installation
-In order to use this application, install all dependencies through the following command:
-```
-pip install -r requirements.txt
-```
-Then run interface.py
-```
-python interface.py
-```
 ## Usage
 ![image](https://github.com/user-attachments/assets/a84fa108-2250-4137-b8fb-af5cd6b43c00)
 

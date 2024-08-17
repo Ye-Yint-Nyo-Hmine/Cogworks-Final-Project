@@ -30,6 +30,7 @@ These are some important features that our program can accomplish:
 
 ## Usage
 ![image](https://github.com/user-attachments/assets/a84fa108-2250-4137-b8fb-af5cd6b43c00)
+![image](https://github.com/user-attachments/assets/b712efac-99ba-4792-9527-f4397a80e7e5)
 
 ## Configuration
 We already optimized the configuration of this program. 
